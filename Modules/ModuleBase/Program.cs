@@ -24,7 +24,7 @@ var LtCimLtEdcTest = "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=10.2
 builder.Services.AddDbContext<LtCimLtEdcProdDbContext>(options =>
 {
 	options.UseOracle(LtCimLtEdcProd);
-	// 實務上換成正式庫連線字串
+	//  實務上換成正式庫連線字串
 });
 
 builder.Services.AddDbContext<LtCimLtEdcTestDbContext>(options =>
