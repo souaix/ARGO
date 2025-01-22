@@ -1,0 +1,126 @@
+﻿
+@{
+    
+    Layout = null;
+ }
+ @model Core.Entities.Main.VLogin
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>同欣電子CIM系統</title>
+        <!--CSS-->
+        <link href="/shared/lib/css/cimlogin.css" rel="stylesheet" />
+        <!--Font Awesome-->
+        <link href="/shared/lib/font-awesome/css/all.css" rel="stylesheet" type="text/css">
+    
+        <!--Vue-->
+        <script src="/shared/lib/vue/vue.js"></script>
+
+        <!--Element-UI-->
+        <script src="/shared/lib/element-ui/index.js"></script>
+        <link href="/shared/lib/element-ui/theme-chalk/index.css" rel="stylesheet">
+
+        <!--Ajax(axios)-->
+        <script src="/shared/lib/axios/axios.min.js"></script>
+        @* <script src="/shared/lib/vue-resource/vue-resource.min.js"></script> *@
+
+    </head>
+
+    <body>
+        <div id="app">
+
+        <form asp-controller="Main" asp-action="Login" method="post">
+                <div class="dowebok">
+                    <div class="logo"></div>
+                    <div style="color:white;padding-bottom: 15px;padding-left: 50px">
+                    <input type="radio" id="envProduction" name="Environment" value="envProduction" v-model="environment" checked>
+                        <label for="environmentNormal">正式區</label>
+                    <input type="radio" id="envTest" name="Environment" value="envTest" v-model="environment">
+                        <label for="environmentTest">測試區</label>
+                    </div>
+
+                    <div class="form-item">
+                        <div class="pack">
+                            <i class="fa-solid fa-house" style="color:white;font-size:1.5em"></i>
+                        <input asp-for="UserNo" class="form-control" placeholder="請輸入工號(ID)" v-model="opid" />
+                            <span asp-validation-for="UserNo" class="text-danger"></span>
+                        </div>
+                
+                    </div>
+           
+                    <div class="form-item">
+                        <div class="pack">      
+                            <i class="fa-solid fa-lock" style="color:white;font-size:1.5em"></i>
+                        <input asp-for="Password" type="password" class="form-control" placeholder="請輸入密碼(PWD)"  v-model="psw" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-item"><button id="submit" v-on:click="checklogin">Login</button></div>
+         
+                    <div class="reg-bar">
+                        <a class="forget" href="https://resetpw.theil.com/" target="_blank">Change Password </a>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+
+        <script src="~/jquery/jquery.js"></script>
+
+    </body>
+
+
+     <script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                opid: '',
+                psw: '',
+                environment: 'envProduction' // 預設正式區
+            };
+        },
+        methods: {
+            checklogin() {
+                if (this.opid === '' && this.psw === '') {
+                    this.$message({
+                        message: '請輸入帳號/密碼!',
+                        type: 'error'
+                    });
+                    window.event.returnValue = false;
+                } else if (this.psw === '') {
+                    this.$message({
+                        message: '請輸入密碼!',
+                        type: 'error'
+                    });
+                    window.event.returnValue = false;
+                } else if (this.opid === '') {
+                    this.$message({
+                        message: '請輸入帳號!',
+                        type: 'error'
+                    });
+                    window.event.returnValue = false;
+                }
+            }
+        },
+        mounted() {
+            var alert = '@Html.Raw(TempData["alert"])';
+            if (alert !== '' && alert !== null) {
+                this.$message({
+                    message: alert,
+                    type: 'error'
+                });
+            }
+            this.opid = '@ViewBag.UserNo'; // 初始化 Vue 的 opid 為 ViewBag.UserNo
+            
+        }
+    });
+    </script>
+
+</html>
+

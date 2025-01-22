@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <!--<EnableDefaultRazorGenerateItems>false</EnableDefaultRazorGenerateItems>-->
+    <EnableDefaultRazorTargetAssemblyInfoAttributes>false</EnableDefaultRazorTargetAssemblyInfoAttributes>
+    <EnableRazorSdkContent>false</EnableRazorSdkContent>
+  </PropertyGroup>
+</Project>

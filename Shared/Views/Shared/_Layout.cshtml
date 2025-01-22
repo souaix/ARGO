@@ -1,0 +1,117 @@
+﻿@using System.Security.Claims;
+
+
+@{
+    var UserId = User.Identity.Name;
+
+}
+
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewData["Title"] - CIM 2.0</title>
+    <!--CSS-->
+    <link href="~/shared/lib/css/style_sidebar.css?v=202410251702" rel="stylesheet" />
+    <link href="~/shared/lib/css/style_element.css?v=202410251101" rel="stylesheet" />
+    <!--JQuery-->
+    <script src="~/shared/lib/jquery/jquery.js"></script>
+
+    <!--JS-->
+    <script src="~/shared/lib/jquery/script_sidebar.js"></script>
+
+    <!--Bootstrap-->
+    <script src="~/shared/lib/bootstrap/js/bootstrap.js"></script>
+    <link href="~/shared/lib/bootstrap/css/bootstrap.css" rel="stylesheet" />
+    <link href="~/shared/lib/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+    <!--Font Awesome-->
+    <link href="~/shared/lib/font-awesome/css/all.css" rel="stylesheet" type="text/css">
+
+    <!--Chart.js-->
+    <script src="~/shared/lib/Chart.js/Chart.min.js"></script>
+    <script src="~/shared/lib/Chart.js/Chart.plug.js"></script>
+
+    <!--Vue.js-->
+    <script src="~/shared/lib/vue/vue.js"></script>
+    <script>Vue.config.productionTip = false</script>
+
+    <!--Vue Ajax(axios)-->
+    <script src="~/shared/lib/axios/axios.min.js"></script>
+    <script src="~/shared/lib/FileSaver.js/FileSaver.min.js"></script>
+
+    <!--element-plus-->
+    @* 隱藏Vue提示(You are running Vue in development mode) *@
+    <script src="~/shared/lib/element-ui/index.js"></script>
+    <script src="~/shared/lib/element-ui/locale/zh-TW.js"></script>
+    @* 使用繁體中文包 *@
+    <script>ELEMENT.locale(ELEMENT.lang.zhTW)</script>
+    <link href="~/shared/lib/element-ui/theme-chalk/index.css" rel="stylesheet" />
+
+</head>
+
+<body>
+  
+    <div class="container-all">
+        @* ViewComponent功能 *@
+
+        @await Component.InvokeAsync("UserMenu", new { id = UserId }) @* 傳入參數id*@
+
+        <!--右邊-->
+
+        <div class="container-right" style="width:87%">
+            <!--上面-->
+            <div class="container-top" align="right">
+
+
+                <form asp-controller="Main" asp-action="Logout">
+
+                    @* <a href="@Url.Action("Index", "Main")">Main</a>  *@@* class="nav-link" *@
+
+                    @*       <font style="font-size:20px">
+                        <i class="bi bi-exclamation-diamond-fill"></i> 
+                        測試區　　　　　　　　　　　　　　　　　　　　　　　　　　　　
+                        <i class="bi bi-person-fill"></i> @UserId　
+                    </font> *@
+                    <font style="font-size:20px">
+                        <i class="bi bi-person-fill"></i> @UserId　
+                    </font>
+                    @* <a href="javascript:void(0)" style="text-decoration:none">
+                        <font style="font-size:22px;color:rgba(251, 170, 162,0.9)">
+                            <i class="bi bi-toggle-on"></i>
+                        </font>
+                        <font style="font-size:20px;color:rgba(237, 222, 223, 0.9);"
+                              onMouseOver="this.style.color='white'"
+                              onMouseOut="this.style.color='rgba(237, 222, 223, 0.9)'"
+                              onclick="window.location.href='https://at-cim.theil.com'">
+                            切換正式區　
+                        </font>
+                    </a> *@
+
+                    <input class="button purple" type="submit" value="Logout" />
+
+                </form>
+
+                @if (IsSectionDefined("TopTitle"))
+                {
+                    @RenderSection("TopTitle")
+                    ;
+                }
+            </div>
+
+            <!--右邊-->
+            <div class="container-down">
+
+                @RenderBody()
+
+            </div>
+        </div>
+
+    </div>
+
+    @RenderSection("Scripts", required: false)
+    @await Html.PartialAsync("_ToastPartial")
+</body>
+</html>

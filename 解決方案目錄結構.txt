@@ -1,0 +1,67 @@
+/Solution.sln
+
+/Core
+   ├── Core.csproj
+   ├── Entities
+   │   ├── Home
+   │   │   ├── VLogin.cs
+   │   │   ├── VMenuList.cs
+   │   ├── LtCimLtEdc
+   │   │   └── UserMenu.cs
+   ├── Interfaces
+   │   ├── IDbContextFactory.cs
+   │   └── IVerifyService.cs
+
+/Infrastructure
+   ├── Infrastructure.csproj
+   ├── Data
+   │   ├── DbContexts
+   │   │   ├── LtCimLtEdcProdDbContext.cs
+   │   │   ├── LtCimLtEdcTestDbContext.cs
+   │   ├── Factories
+   │   │   └── DbContextFactory.cs
+   ├── Repositories
+   │   ├── IVerifyRepository.cs
+   │   ├── ILtCimLtEdcRepository.cs
+   │   ├── VerifyRepository.cs
+   │   └── LtCimLtEdcRepository.cs
+   └── Services
+       ├── VerifyService.cs
+
+/Shared
+   ├── Shared.csproj
+   ├── Views
+   │   ├── Shared
+   │   │   ├── _Layout.cshtml
+   │   │   └── _ToastPartial.cshtml
+   ├── wwwroot
+   │   ├── css
+   │   ├── js
+   │   └── images
+
+/Main
+   ├── Main.csproj
+   ├── Program.cs
+   ├── Controllers
+   │   └── MainController.cs
+   ├── Views
+   │   ├── Main
+   │   │   ├── Index.cshtml
+   │   │   └── Login.cshtml
+   ├── wwwroot
+       ├── css
+       ├── js
+
+/ModuleA
+   ├── ModuleA.csproj
+   ├── Controllers
+   │   └── ModuleAController.cs
+   ├── Services
+   │   ├── IModuleAService.cs
+   │   └── ModuleAService.cs
+   ├── Views
+   │   ├── Home
+   │   │   └── Index.cshtml
+   ├── wwwroot
+   │   ├── css
+   │   ├── js

@@ -1,0 +1,122 @@
+﻿@* @using Azure.Core *@
+@using Microsoft.AspNetCore.Mvc;
+@using Microsoft.AspNetCore.Mvc.Razor;
+
+
+<!--左邊-->
+<div class="container-left">
+    <!--導覽列-->
+    <nav id="sidebar">
+        <!--展開按鈕-->
+        <button type="button" id="collapse" class="collapse-btn">
+            <i class="fas fa-align-left"></i>
+        </button>
+        <h1>THEIL</h1>
+
+        <!--總列表區域-->
+        <ul class="list-unstyled navbar-nav" id="menu">
+
+            @{
+                // 依角色判斷需列出的選單
+                if (ViewBag.UserMenu.Length > 0)
+                {
+                    var MENULIST = (IEnumerable<dynamic>)ViewBag.UserMenu;
+
+                    var c1n = MENULIST.Select(x => new { x.LEVEL01, x.LEVEL01NO }).GroupBy(x => x).Select(x => x.FirstOrDefault()).Distinct().ToArray();
+                    var icon = MENULIST.Select(x => x.ICON).GroupBy(x => x).Select(x => x.FirstOrDefault()).Distinct().ToArray();
+
+                    for (int i = 0; i < c1n.Length; i++)
+                    {
+
+                        var class1_item = c1n[i].LEVEL01;
+                        var class1_item_code = c1n[i].LEVEL01NO;
+                        var icon_item = icon[i];
+
+                        // 確認icon存在 (因icon可null 故跟c1n非1v1對應)
+                        // var icon_item = Array.IndexOf(icon, i);
+                        // if (icon_item != -1)
+                        // {
+                        //     icon_item = icon[i];
+                        // }
+
+
+                        var momdivclass = (class1_item_code == ViewBag.class1_item) ? "dropdown fade in sonmenu collapse show" : "dropdown fade in sonmenu collapse";
+
+                        <!--母選單按鈕-->
+                        <li>
+
+                        </li>
+                        <li>
+                            <a id="collapse" data-bs-toggle="collapse" role="button" aria-expanded="true" data-bs-target="#@class1_item_code" aria-controls="@class1_item_code">
+                                @class1_item
+                                <c1><i class="@icon_item"></i></c1>
+                                <c1>@Html.Raw(icon_item)</c1>
+                            </a>
+
+                            <!--子列表選單，屬於總列表區域-->
+
+                            <div id="@class1_item_code" class="@momdivclass" data-bs-parent="#menu">
+
+                                @{
+                                    <!--撈取子列表-->
+                                    var c2n = MENULIST.Where(x => x.LEVEL01NO == class1_item_code).Select(x => new { x.LEVEL02, x.LEVEL02NO }).Distinct().ToArray();
+                                    // foreach (var class2_item in c2n)
+                                    for (int ii = 0; ii < c2n.Length; ii++)
+                                    {
+                                        var class2_item = c2n[ii].LEVEL02;
+                                        var class2_item_code = c2n[ii].LEVEL02NO;
+
+                                        var sondivclass = (class1_item_code == ViewBag.class1_item && class2_item_code == ViewBag.class2_item) ? "dropdown fade in grandmenu collapse show" : "dropdown fade in grandmenu collapse";
+                                        <!--子選單按鈕-->
+
+                                        <a id="collapse" data-bs-toggle="collapse" role="button" aria-expanded="true" data-bs-target="#@class1_item_code@class2_item_code" aria-controls="@class1_item_code@class2_item_code">
+                                            @class2_item
+                                        </a>
+
+                                        <!--孫列表選單，屬於子列表區域-->
+                                        <div id="@class1_item_code@class2_item_code" class="@sondivclass" data-bs-parent="#@class1_item_code">
+
+                                            @{
+                                                var c3n = MENULIST.Where(x => x.LEVEL01NO == class1_item_code & x.LEVEL02NO == class2_item_code).Select(x => x.LEVEL03).ToArray();
+                                                var ctrl = MENULIST.Where(x => x.LEVEL01NO == class1_item_code & x.LEVEL02NO == class2_item_code).Select(x => x.CONTROLLER).ToArray();
+                                                var action = MENULIST.Where(x => x.LEVEL01NO == class1_item_code & x.LEVEL02NO == class2_item_code).Select(x => x.ACTION).ToArray();
+                                            }
+
+                                            @{
+                                                var c = 0;
+                                                foreach (var c3n_item in c3n)
+                                                {
+
+                                                    <!--孫選單按鈕-->
+                                                    <form asp-controller="@ctrl[c]" asp-action="@action[c]" method="post">
+                                                        <input type="text" name="class1_item" value="@class1_item_code" hidden />
+                                                        <input type="text" name="class2_item" value="@class2_item_code" hidden />
+                                                        <input type="submit" value="@c3n_item" class="menusubmit"/>
+                                                    </form>
+
+                                                    c = c + 1;
+                                                }
+                                            }
+
+
+
+                                        </div>
+
+                                    }
+                                }
+
+                            </div>
+
+                        </li>
+
+
+                    }
+                }
+                
+            }
+
+
+        </ul>
+
+    </nav>
+</div>

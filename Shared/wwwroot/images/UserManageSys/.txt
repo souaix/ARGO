@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+# coding: utf-8
+from sqlalchemy import types, create_engine
+import pyodbc
+import cx_Oracle
+from sqlalchemy import text
+from sqlalchemy.pool import NullPool
+import datetime
+import pandas as pd
+import warnings 
+warnings.filterwarnings('ignore')
+
+import sys
+sys.path.append()
+import connect.connect as cc
+
+cim_ubuntu = cc.connect()
+bossmen = cc.connect()
+
+
+halfhourbefore = (datetime.datetime.now()+datetime.timedelta(minutes=-30)).strftime('%Y-%m-%d %H:%M:%S')
+
+sql ="SELECT RegistorType,Site as source,Device as machine,node,RelativeTag as no ,unit,value,DateTime as time from RegistorTable where DateTime >='"+halfhourbefore+"'"
+df = pd.read_sql(sql,bossmen)
+
+df_ = df[df["node"]==" 冰箱NO8/NO9/NO10"]
+df_ = df_.reset_index(drop=True)
+
+df_3in1=[]
+for i in range(0,len(df_)):
+    df__=df_[i:i+1]
+    # print(df__["RegistorType"][i])
+    if(df__["RegistorType"][i]=="Temp1 Value"):        
+        df__["node"]="冰箱N10"
+    elif(df__["RegistorType"][i]=="Temp2 Value"):        
+        df__["node"]="冰箱N09"
+    elif(df__["RegistorType"][i]=="Temp3 Value"):                
+        df__["node"]="冰箱N08"
+    df_3in1.append(df__)
+df_3in1 = pd.concat(df_3in1)    
+df_3in1["unit"]="deg"
+
+df_ = df[df["node"]!=" 冰箱NO8/NO9/NO10"]
+df = pd.concat( [df_, df_3in1], join="outer")
+df = df.reset_index(drop=True)
+del df["RegistorType"]
+df.to_sql('om_bossmen',cim_ubuntu,if_exists='replace', index=False)
