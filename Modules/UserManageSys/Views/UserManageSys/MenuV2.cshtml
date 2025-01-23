@@ -1,0 +1,417 @@
+﻿@{
+	Layout = "_Layout";
+	var UserId = User.Identity.Name;
+}
+
+
+<style scoped>
+	[v-cloak] {
+		display: none;
+	}
+
+	/* 懸浮視窗標題顏色 */
+	.el-dialog__header {
+		background-color: #8E8E8E;
+		.el-dialog__title,.el-dialog__headerbtn i
+
+	{
+		color: white;
+	}
+
+	}
+
+	.el-table__body tr.current-row > td {
+		background: #FFF3EE !important;
+	}
+
+	/* div class */
+	.boxLeft {
+		float: left;
+		margin: 0px;
+		height: 97%;
+		width: 20%;
+		overflow-y: auto;
+		border: none;
+		p
+
+	{
+		line-height: 1.5;
+		padding: 1em;
+	}
+
+	}
+
+	.boxRight {
+		height: 100%;
+		width: 80%;
+		overflow-y: auto;
+		border: none;
+		p
+
+	{
+		line-height: 1.5;
+		padding: 1em;
+	}
+
+	}
+
+	/* for檔案上傳,若已建立一張圖片,隱藏上傳的組件 */
+	.hide-upload-btn {
+		.el-upload.el-upload--picture-card
+
+	{
+		display: none;
+	}
+
+	}
+
+	.el-upload--picture-card {
+		width: 100%;
+	}
+
+	.el-upload {
+		width: 100%;
+	}
+
+	.el-upload-list--picture-card .el-upload-list__item {
+		width: 100%;
+	}
+</style>
+
+<div id="app">
+
+	@* 標籤按鈕 *@
+	<div>
+		<h3>選單基本資訊</h3>
+	</div>
+
+	<hr></hr>
+
+	<div v-if="Loading"></div>
+
+	<div v-else>
+		@* 懸浮視窗 *@
+		<div v-if="DialogTableVisible">
+			@* 推測加上v-if, 當dialog關閉時會將整個dialog銷毀,重新展開時就會是新的生命週期 *@
+			<el-dialog :title="`${DialogTitle}`" :visible.sync="DialogTableVisible" width="70%">
+				@* v-on:close="DialogClose()" 此方法是將form 輸入框重置,但重新打開dialog會導致原應選中狀態無法重新渲染*@
+
+				<el-input placeholder="關鍵字查詢( 角色代碼 / 名稱說明 )" prefix-icon="el-icon-search" v-bind:style="{width:'300px'}" v-model="SearchDialog"></el-input>
+
+				@* 功能綁定角色 *@
+				<el-table :data="DialogFilter.slice((DialogCurrentPage-1)*DialogPageSize,DialogCurrentPage*DialogPageSize)"
+						  :header-cell-style="{background:'#5B5B5B',color:'white','text-align':'center'}"
+						  :row-style="{background:'#ECF5FF'}"
+						  border highlight-current-row>
+					<el-table-column v-bind:width="80" label="綁定狀態" align="center">
+						<template slot-scope="rows">
+							<input type="checkbox"
+								   style="width:20px;height:20px"
+								   :key="rows.row.Roleno"
+								   v-bind:checked="ChildCheckboxArr.includes(`${rows.row.Roleno}`)"
+								   v-on:change="DataBind(`${rows.row.Roleno}`,'ChildCheckboxArr','ArgoCimCimUserroledetail')">
+						</template>
+					</el-table-column>
+					<el-table-column v-for="(item,index) in ChildTblProperty"
+									 v-bind:width="ChildTblWidth[index]"
+									 v-bind:property="item"
+									 v-bind:label="ChildTblLabel[index]"
+									 v-bind:key="index"
+									 sortable>
+					</el-table-column>
+				</el-table>
+
+				<hr></hr>
+
+				<el-pagination background
+							   layout="total, prev, pager, next,jumper"
+							   :total="DialogFilter.length"
+							   :current-page.sync="DialogCurrentPage"
+							   :page-size="DialogPageSize"
+							   :hide-on-single-page="HideSinglePage"
+							   style="text-align:center"
+							   @@current-change="DialogHandleCurrentChange"></el-pagination>
+			</el-dialog>
+		</div>
+
+		@* 選單 data *@
+		@* 新增選單功能 *@
+		<div style="height:85vh;width:100%">
+			<div class="boxLeft" v-show="AddBox">
+				<el-form :model="FormAdd" :rules="FormRules" id="ArgoCimCimSystemmenulist" ref="ArgoCimCimSystemmenulist">
+					@* element ui 表單驗證 *@
+					<table class="table" style="width:98%">
+						<tbody>
+							<tr>
+								<td style="background-color:#5B5B5B;color:white;width:90px" align="right">*歸屬BU</td>
+								<td style="background-color:#E6E6F2">
+									<el-form-item prop="Input1">
+										@* element ui 表單驗證 *@
+										<el-input v-if="EditStatus" style="width:100%" name="Belongbu" v-model="FormAdd.Input1" disabled></el-input>
+										<el-select v-else style="width:100%" name="Belongbu" v-model="FormAdd.Input1" v-on:change="GetOptions()" filterable allow-create clearable>
+											<el-option v-for="item in Input1Options" :value="item" :key="item" :label="item"></el-option>
+										</el-select>
+									</el-form-item>
+								</td>
+							</tr>
+							<tr>
+								<td style="background-color:#5B5B5B;color:white" align="right">*歸屬部門</td>
+								<td style="background-color:#E6E6F2">
+									<el-form-item prop="Input2">
+										@* element ui 表單驗證 *@
+										<el-select style="width:100%" name="Belongdept" v-model="FormAdd.Input2" filterable>
+											<el-option v-for="item in Input2Options" v-if="item!=''" :value="item" :key="item" :label="item"></el-option>
+										</el-select>
+									</el-form-item>
+								</td>
+							</tr>
+							<tr>
+								<td style="background-color:#5B5B5B;color:white" align="right">*系統代碼</td>
+								<td style="background-color:#E6E6F2">
+									<el-form-item prop="Input3">
+										@* element ui 表單驗證 *@
+										<el-input v-if="EditStatus" style="width:100%" name="Level01no" v-model="FormAdd.Input3" disabled></el-input>
+										<el-select v-else style="width:100%" name="Level01no" v-model="FormAdd.Input3" v-on:change="GetOptions()" filterable allow-create clearable>
+											<el-option v-for="item in Input3Options"
+													   :value="item.code"
+													   :key="item.code"
+													   :label="item.code"
+													   v-on:click.native="FormAdd.Input4=`${item.name}`"></el-option> @* 加.native修飾符可於element ui組件觸發DOM原生事件 *@
+										</el-select>
+									</el-form-item>
+								</td>
+							</tr>
+							<tr>
+								<td style="background-color:#5B5B5B;color:white" align="right">*系統名稱</td>
+								<td style="background-color:#E6E6F2">
+									<el-form-item prop="Input4">
+										@* element ui 表單驗證 *@
+										<el-input v-if="EditStatus" style="width:100%" name="Level01" v-model="FormAdd.Input4" disabled></el-input>
+										<el-input v-else style="width:100%" name="Level01" v-model="FormAdd.Input4"></el-input>
+									</el-form-item>
+								</td>
+							</tr>
+							<tr>
+								<td style="background-color:#5B5B5B;color:white;width:85px" align="right">*模組代碼</td>
+								<td style="background-color:#E6E6F2">
+									<el-form-item prop="Input5">
+										@* element ui 表單驗證 *@
+										<el-input v-if="EditStatus" style="width:100%" name="Level02no" v-model="FormAdd.Input5" disabled></el-input>
+										<el-select v-else style="width:100%" name="Level02no" v-model="FormAdd.Input5" v-on:change="GetOptions()" filterable allow-create clearable>
+											<el-option v-for="item in Input5Options"
+													   :value="item.code"
+													   :key="item.code"
+													   :label="item.code"
+													   v-on:click.native="FormAdd.Input6=`${item.name}`"></el-option>
+										</el-select>
+									</el-form-item>
+								</td>
+							</tr>
+							<tr>
+								<td style="background-color:#5B5B5B;color:white" align="right">*模組名稱</td>
+								<td style="background-color:#E6E6F2">
+									<el-form-item prop="Input6">
+										@* element ui 表單驗證 *@
+										<el-input v-if="EditStatus" style="width:100%" name="Level02" v-model="FormAdd.Input6" disabled></el-input>
+										<el-input v-else style="width:100%" name="Level02" v-model="FormAdd.Input6"></el-input>
+									</el-form-item>
+								</td>
+							</tr>
+							<tr>
+								<td style="background-color:#871717;color:white" align="right">功能代碼</td>
+								<td style="background-color:#FBE9E9">
+									<el-input style="width:100%" name="Level03no" v-model="FormAdd.Input7" disabled></el-input>
+								</td>
+							</tr>
+							<tr>
+								<td style="background-color:#5B5B5B;color:white" align="right">*功能名稱</td>
+								<td style="background-color:#E6E6F2">
+									<el-form-item prop="Input8">
+										@* element ui 表單驗證 *@
+										<el-input style="width:100%" name="Level03" v-model="FormAdd.Input8"></el-input>
+									</el-form-item>
+								</td>
+							</tr>
+							<tr>
+								<td style="background-color:#5B5B5B;color:white" align="right">*ICON</td>
+								<td style="background-color:#E6E6F2">
+									<el-form-item prop="Input9">
+										@* element ui 表單驗證 *@
+										<el-input style="width:100%" name="Icon" v-model="FormAdd.Input9"></el-input>
+									</el-form-item>
+								</td>
+							</tr>
+							<tr>
+								<td style="background-color:#5B5B5B;color:white" align="right">*控制器</td>
+								<td style="background-color:#E6E6F2">
+									<el-form-item prop="Input10">
+										@* element ui 表單驗證 *@
+										<el-input style="width:100%" name="Controller" v-model="FormAdd.Input10"></el-input>  @* onkeyup="value=this.value.replace(/[^a-z|A-Z|0-9]/g,'').toUpperCase()" *@
+									</el-form-item>
+								</td>
+							</tr>
+							<tr>
+								<td style="background-color:#5B5B5B;color:white" align="right">*ACTION</td>
+								<td style="background-color:#E6E6F2">
+									<el-form-item prop="Input11">
+										@* element ui 表單驗證 *@
+										<el-input style="width:100%" name="Action" v-model="FormAdd.Input11"></el-input>  @* onkeyup="value=this.value.replace(/[^a-z|A-Z|0-9]/g,'').toUpperCase()" *@
+									</el-form-item>
+								</td>
+							</tr>
+							<tr>
+								<td style="background-color:#5B5B5B;color:white" align="right">*排序</td>
+								<td style="background-color:#E6E6F2">
+									<el-form-item prop="Input12">
+										@* element ui 表單驗證 *@
+										<el-input-number style="width:100%" name="Sequence" v-model="FormAdd.Input12"></el-input-number>
+									</el-form-item>
+								</td>
+							</tr>
+							<tr>
+								<td style="background-color:#5B5B5B;color:white" align="right">關鍵字</td>
+								<td style="background-color:#E6E6F2">
+									<el-input style="width:100%" name="Keyword" v-model="FormAdd.Input13" onkeyup="value=this.value.toUpperCase()"></el-input>
+								</td>
+							</tr>
+							<tr>
+								<td style="background-color:#5B5B5B;color:white" align="right">*是否啟用</td>
+								<td style="background-color:#E6E6F2">
+									<el-form-item prop="Input14">
+										@* element ui 表單驗證 *@
+										<el-select style="width:100%" name="Enabled" v-model="FormAdd.Input14">
+											<el-option value="Y" label="Y"></el-option>
+											<el-option value="N" label="N"></el-option>
+										</el-select>
+									</el-form-item>
+								</td>
+							</tr>
+							<tr>
+								<td style="background-color:#5B5B5B;color:white" align="right">備註</td>
+								<td style="background-color:#E6E6F2">
+									<el-input style="width:100%" name="Remark" v-model="FormAdd.Input15"></el-input>
+								</td>
+							</tr>
+							<tr>
+								<td style="background-color:#5B5B5B;color:white" align="right">圖片上傳</td>
+								<td style="background-color:#E6E6F2">
+									<div v-if="FormAdd.ImageUrl!=''" class="demo-image__preview">
+										已上傳:
+										<el-image style="width:100%" :src="FormAdd.ImageUrl" :preview-src-list="FormAdd.ImageList"></el-image>  @* 顯示已上傳的圖片 *@
+										重新上傳:
+									</div>
+									<el-upload action="#"
+											   list-type="picture-card"
+											   accept=".png"
+											   :limit="1"
+											   :on-change="GetUrl"
+											   :class="{'hide-upload-btn':HideUploadBtn}"
+											   ref="upload"
+											   :auto-upload="false">
+										<i slot="default" class="el-icon-plus"></i>
+										<div slot="file" slot-scope="{file}">
+											<img class="el-upload-list__item-thumbnail" :src="file.url" alt="">
+											<span class="el-upload-list__item-actions">
+												<span class="el-upload-list__item-preview"
+													  v-on:click="HandlePictureCardPreview(file)">
+													<i class="el-icon-zoom-in"></i>
+												</span>
+												<span class="el-upload-list__item-delete"
+													  v-on:click="HandleRemove(file)">
+													<i class="el-icon-delete"></i>
+												</span>
+											</span>
+										</div>
+									</el-upload>
+									<el-dialog :title="'圖片預覽'" :visible.sync="ImgDialogVisible">
+										<img width="100%" :src="ImgDialogUrl" alt="">
+									</el-dialog>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2" class="table-primary table-active">
+									<el-tooltip class="item" effect="dark" content="標註 * 為必填" placement="right-start">
+										<el-button v-if="EditStatus" type="danger" style="width:60%" v-on:click="DataUpdate('ArgoCimCimSystemmenulist','MenuEdit')" v-bind:loading="AddButton">更新選單</el-button>
+										<el-button v-else type="primary" style="width:100%" v-on:click="DataAdd('ArgoCimCimSystemmenulist')" v-bind:loading="AddButton">新增選單</el-button>
+									</el-tooltip>
+									<el-button v-show="EditStatus" type="info" style="width:30%" v-on:click="EditStatus=false">取消</el-button>
+								</td>
+							</tr>
+						</tbody>
+
+					</table>
+				</el-form>
+			</div>
+
+			@* 選單列表 *@
+			<div class="boxRight" :style="{ width: AddBoxWidth + '%' }">
+				@* 以關鍵字檢索 *@
+				<el-button type="info" :icon="AddBoxIcon" v-on:click="AddBox=!AddBox,AddBoxWidth=AddBoxWidth==75?90:75,AddBoxIcon=AddBox==true?'el-icon-arrow-left':'el-icon-arrow-right'"></el-button>
+				<el-input placeholder="關鍵字查詢( 功能代碼 / 功能名稱 )" prefix-icon="el-icon-search" v-bind:style="{width:'300px'}" v-model="Search"></el-input>
+
+				<el-table :data="ParentFilter.slice((CurrentPage-1)*PageSize,CurrentPage*PageSize)" :header-cell-style="{background:'#5B5B5B',color:'white','text-align':'center'}" :row-style="{background:'#ECF5FF'}" border highlight-current-row>
+					<el-table-column v-bind:width="60" align="center" label="啟用" fixed>
+						<template slot-scope="rows">
+							<el-checkbox v-model="rows.row.Enabled=='Y'?true:false" v-on:change="DataDel('SysMenuEnabled',rows.row,'Level03no')"></el-checkbox>
+						</template>
+					</el-table-column>
+					<el-table-column v-for="(item,index) in ParentTblProperty"
+									 v-if="item=='Level03no'"
+									 v-bind:width="ParentTblWidth[index]"
+									 v-bind:property="item"
+									 v-bind:label="ParentTblLabel[index]"
+									 v-bind:key="index"
+									 sortable fixed>
+						<template slot-scope="rows">
+							<el-button type="text"
+							@* icon="el-icon-edit-outline" *@
+									   v-on:click="DialogTableVisible = true, DialogTitle = `功能 ${rows.row.Level03no} 角色綁定`,GetUserMenuRole(rows.row.Level03no),EditName = `${rows.row.Level03no}`">
+								{{rows.row.Level03no}}
+							</el-button>
+						</template>
+					</el-table-column>
+					<el-table-column v-for="(item,index) in ParentTblProperty"
+									 v-if="item!=='Level03no' && item!=='Enabled' && item!=='File'"
+									 v-bind:width="ParentTblWidth[index]"
+									 v-bind:property="item"
+									 v-bind:label="ParentTblLabel[index]"
+									 v-bind:key="index"
+									 sortable>
+					</el-table-column>
+					<el-table-column v-bind:width="70" label="編輯" align="center" fixed="right">
+						<template slot-scope="rows">
+							<el-button type="primary"
+									   icon="el-icon-edit"
+									   v-on:click="DataMenuEdit(rows.row)"
+									   circle></el-button>
+						</template>
+					</el-table-column>
+				</el-table>
+				<hr></hr>
+				<el-pagination background
+							   layout="total, prev, pager, next,jumper"
+							   :total="ParentFilter.length"
+							   :current-page.sync="CurrentPage"
+							   :page-size="PageSize"
+							   :hide-on-single-page="HideSinglePage"
+							   style="text-align:center"
+							   @@current-change="HandleCurrentChange"></el-pagination>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+
+@section Scripts {
+	<script>
+		// js 檔不支援 Razor 語法, 故於 cshtml 定義 userId
+		var userId = '@UserId'
+
+	</script>
+
+	<script src="~/userManageSysScripts/UserManageSys/Menu.js?v=202501211013"></script>
+
+}
+
+

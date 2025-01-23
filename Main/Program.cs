@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.Server.IISIntegration;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Razor;
 using System.Collections.Generic;
+using UserManageSys.Services;
 
 
 
@@ -83,6 +84,7 @@ builder.Services.AddScoped<IDbContextFactory, DbContextFactory>();
 
 // 4) 註冊您的動態 Repository (若有多個 Repository Interface 也可自行調整)
 builder.Services.AddScoped(typeof(ILtCimLtEdcRepository<>), typeof(EfRepository<>));
+builder.Services.AddScoped<IUserManageSysService, UserManageSysService>();
 
 // 5) 若要在 Repository 裡透過 Session 或 Claims 取得目前使用者所選的環境，需要 HttpContextAccessor
 builder.Services.AddHttpContextAccessor();
@@ -136,6 +138,19 @@ app.UseStaticFiles(new StaticFileOptions
 	FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "../Shared/wwwroot")),
 	RequestPath = "/shared"
 });
+
+app.UseStaticFiles(new StaticFileOptions
+{
+	FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "../Modules/UserManageSys/wwwroot")),
+	RequestPath = "/UserManageSys"
+});
+
+app.UseStaticFiles(new StaticFileOptions
+{
+	FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "../Modules/UserManageSys/Scripts")),
+	RequestPath = "/userManageSysScripts"
+});
+
 
 
 

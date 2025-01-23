@@ -38,9 +38,9 @@ public partial class LtCimLtEdcProdDbContext : DbContext
 
 	public virtual DbSet<ArgoCimCimUserroledetail> ArgoCimCimUserroledetails { get; set; }
 
-	public virtual DbSet<ArgoCimCimUsrUserbasis> ArgoCimCimUsrUserbases { get; set; }
+	//public virtual DbSet<ArgoCimCimUsrUserbasis> ArgoCimCimUsrUserbases { get; set; }
 
-	public virtual DbSet<ArgoCimCimUsrUserrole> ArgoCimCimUsrUserroles { get; set; }
+	//public virtual DbSet<ArgoCimCimUsrUserrole> ArgoCimCimUsrUserroles { get; set; }
 
 	public virtual DbSet<CuMapBu2019> CuMapBu2019s { get; set; }
 
@@ -553,63 +553,63 @@ public partial class LtCimLtEdcProdDbContext : DbContext
 				.HasColumnName("UPDATER");
 		});
 
-		modelBuilder.Entity<ArgoCimCimUsrUserbasis>(entity =>
-		{
-			entity
-				.HasNoKey()
-				.ToTable("ARGO_CIM_CIM_USR_USERBASIS");
+		//modelBuilder.Entity<ArgoCimCimUsrUserbasis>(entity =>
+		//{
+		//	entity
+		//		.HasNoKey()
+		//		.ToTable("ARGO_CIM_CIM_USR_USERBASIS");
 
-			entity.Property(e => e.Comeday)
-				.HasColumnType("DATE")
-				.HasColumnName("COMEDAY");
-			entity.Property(e => e.Dndesc)
-				.HasMaxLength(50)
-				.IsUnicode(false)
-				.HasColumnName("DNDESC");
-			entity.Property(e => e.Dnno)
-				.HasMaxLength(20)
-				.IsUnicode(false)
-				.HasColumnName("DNNO");
-			entity.Property(e => e.Email)
-				.HasMaxLength(70)
-				.IsUnicode(false)
-				.HasColumnName("EMAIL");
-			entity.Property(e => e.Hirestatus)
-				.HasMaxLength(20)
-				.IsUnicode(false)
-				.HasColumnName("HIRESTATUS");
-			entity.Property(e => e.Leaveday)
-				.HasColumnType("DATE")
-				.HasColumnName("LEAVEDAY");
-			entity.Property(e => e.Nowinjob)
-				.HasMaxLength(50)
-				.IsUnicode(false)
-				.HasColumnName("NOWINJOB");
-			entity.Property(e => e.Username)
-				.HasMaxLength(30)
-				.IsUnicode(false)
-				.HasColumnName("USERNAME");
-			entity.Property(e => e.Userno)
-				.HasMaxLength(15)
-				.IsUnicode(false)
-				.HasColumnName("USERNO");
-		});
+		//	entity.Property(e => e.Comeday)
+		//		.HasColumnType("DATE")
+		//		.HasColumnName("COMEDAY");
+		//	entity.Property(e => e.Dndesc)
+		//		.HasMaxLength(50)
+		//		.IsUnicode(false)
+		//		.HasColumnName("DNDESC");
+		//	entity.Property(e => e.Dnno)
+		//		.HasMaxLength(20)
+		//		.IsUnicode(false)
+		//		.HasColumnName("DNNO");
+		//	entity.Property(e => e.Email)
+		//		.HasMaxLength(70)
+		//		.IsUnicode(false)
+		//		.HasColumnName("EMAIL");
+		//	entity.Property(e => e.Hirestatus)
+		//		.HasMaxLength(20)
+		//		.IsUnicode(false)
+		//		.HasColumnName("HIRESTATUS");
+		//	entity.Property(e => e.Leaveday)
+		//		.HasColumnType("DATE")
+		//		.HasColumnName("LEAVEDAY");
+		//	entity.Property(e => e.Nowinjob)
+		//		.HasMaxLength(50)
+		//		.IsUnicode(false)
+		//		.HasColumnName("NOWINJOB");
+		//	entity.Property(e => e.Username)
+		//		.HasMaxLength(30)
+		//		.IsUnicode(false)
+		//		.HasColumnName("USERNAME");
+		//	entity.Property(e => e.Userno)
+		//		.HasMaxLength(15)
+		//		.IsUnicode(false)
+		//		.HasColumnName("USERNO");
+		//});
 
-		modelBuilder.Entity<ArgoCimCimUsrUserrole>(entity =>
-		{
-			entity
-				.HasNoKey()
-				.ToTable("ARGO_CIM_CIM_USR_USERROLE");
+		//modelBuilder.Entity<ArgoCimCimUsrUserrole>(entity =>
+		//{
+		//	entity
+		//		.HasNoKey()
+		//		.ToTable("ARGO_CIM_CIM_USR_USERROLE");
 
-			entity.Property(e => e.Role)
-				.HasMaxLength(100)
-				.IsUnicode(false)
-				.HasColumnName("ROLE");
-			entity.Property(e => e.Userno)
-				.HasMaxLength(10)
-				.IsUnicode(false)
-				.HasColumnName("USERNO");
-		});
+		//	entity.Property(e => e.Role)
+		//		.HasMaxLength(100)
+		//		.IsUnicode(false)
+		//		.HasColumnName("ROLE");
+		//	entity.Property(e => e.Userno)
+		//		.HasMaxLength(10)
+		//		.IsUnicode(false)
+		//		.HasColumnName("USERNO");
+		//});
 
 		modelBuilder.Entity<CuMapBu2019>(entity =>
 		{

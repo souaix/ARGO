@@ -30,8 +30,10 @@ namespace Infrastructure.Services
 				return string.Empty;
 
 			// 模擬角色和功能列表組合
-			var roleDetails = userRole.Split(",").Select(role => $"Role_{role}"); // 假設功能代碼加前綴
-			return string.Join(",", roleDetails);
+			//var roleDetails = userRole.Split(",").Select(role => $"Role_{role}"); // 假設功能代碼加前綴
+			//return string.Join(",", roleDetails);
+
+			return userRole;
 		}
 	}
 }

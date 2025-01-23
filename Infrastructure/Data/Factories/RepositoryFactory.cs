@@ -23,8 +23,8 @@ public class RepositoryFactory : IRepositoryFactory
 	{
 		return environment switch
 		{
-			"cimRisProd" => new OracleRepository(_cimRisProdConnectionString),
-			"cimRisTest" => new OracleRepository(_cimRisTestConnectionString),
+			"cscimEmapProd" => new OracleRepository(_cimRisProdConnectionString),
+			"cscimEmapTest" => new OracleRepository(_cimRisTestConnectionString),
 			_ => throw new ArgumentException($"Invalid environment: {environment}")
 		};
 	}
