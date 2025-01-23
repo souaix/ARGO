@@ -1,0 +1,246 @@
+﻿@{
+	Layout = "_Layout";
+	var UserId = User.Identity.Name;
+}
+
+<style scoped>
+	[v-cloak] {
+		display: none;
+	}
+
+	/* 懸浮視窗標題顏色 */
+	.el-dialog__header {
+		background-color: #8E8E8E;
+		.el-dialog__title,.el-dialog__headerbtn i
+
+	{
+		color: white;
+	}
+
+	}
+
+	.el-table__body tr.current-row > td {
+		background: #FFF3EE !important;
+	}
+
+	/* div class */
+	.boxLeft {
+		float: left;
+		margin: 0px;
+		height: 100%;
+		width: 20%;
+		overflow-y: auto;
+		border: none;
+		p
+
+	{
+		line-height: 1.5;
+		padding: 1em;
+	}
+
+	}
+
+	.boxRight {
+		height: 100%;
+		width: 75%;
+		overflow-y: auto;
+		border: none;
+		p
+
+	{
+		line-height: 1.5;
+		padding: 1em;
+	}
+
+	}
+</style>
+
+<div id="app">
+
+	<div>
+		<h3>角色基本資訊</h3>
+	</div>
+
+	<hr></hr>
+
+	<div v-if="Loading"></div>
+
+	<div v-else>
+
+		@* 懸浮視窗 *@
+		<div v-if="DialogTableVisible">
+			@* 推測加上v-if, 當dialog關閉時會將整個dialog銷毀,重新展開時就會是新的生命週期 *@
+
+			<el-dialog :title="`${DialogTitle}`" :visible.sync="DialogTableVisible" width="70%">
+				@* v-on:close="DialogClose()" 此方法是將form 輸入框重置,但重新打開dialog會導致原應選中狀態無法重新渲染*@
+
+				<el-input placeholder="關鍵字查詢( 功能代碼 / 功能名稱 )" prefix-icon="el-icon-search" v-bind:style="{width:'300px'}" v-model="SearchDialog"></el-input>
+
+				@* 角色綁定功能 *@
+				<el-table :data="DialogFilter.slice((DialogCurrentPage-1)*DialogPageSize,DialogCurrentPage*DialogPageSize)"
+						  :header-cell-style="{background:'#5B5B5B',color:'white','text-align':'center'}"
+						  :row-style="{background:'#ECF5FF'}"
+						  border highlight-current-row>
+					<el-table-column v-bind:width="80" label="綁定狀態" align="center" fixed>
+						<template slot-scope="rows">
+							<input type="checkbox"
+								   style="width:20px;height:20px"
+								   :key="rows.row.Level03no"
+								   v-bind:checked="ChildCheckboxArr.includes(`${rows.row.Level03no}`)"
+								   v-on:change="DataBind(`${rows.row.Level03no}`,'ChildCheckboxArr','ArgoCimCimUserroledetail')">
+						</template>
+					</el-table-column>
+					<el-table-column width="60" property="Enabled" label="啟用" align="center"></el-table-column>
+					<el-table-column v-for="(item,index) in ChildTblProperty"
+									 v-if="index < 15"
+									 v-bind:width="ChildTblWidth[index]"
+									 v-bind:property="item"
+									 v-bind:label="ChildTblLabel[index]"
+									 v-bind:key="index"
+									 sortable></el-table-column>
+				</el-table>
+
+				<hr></hr>
+
+				<el-pagination background
+							   layout="total, prev, pager, next,jumper"
+							   :total="DialogFilter.length"
+							   :current-page.sync="DialogCurrentPage"
+							   :page-size="DialogPageSize"
+							   :hide-on-single-page="HideSinglePage"
+							   style="text-align:center"
+							   @@current-change="DialogHandleCurrentChange"></el-pagination>
+			</el-dialog>
+		</div>
+
+		@* 角色 data *@
+		@* 新增角色功能 *@
+		<div class="boxLeft" v-show="AddBox">
+			<el-form :model="FormAdd" :rules="FormRules" id="ArgoCimCimUserrolebasis" ref="ArgoCimCimUserrolebasis">
+				@* element ui 表單驗證 *@
+				<table class="table" style="width:95%">
+					<tbody>
+						<tr>
+							<td style="background-color:#5B5B5B;color:white;width:90px" align="right">*角色代碼</td> @* valign="middle" *@
+							<td style="background-color:#E6E6F2">
+								<el-form-item prop="Input1">
+									@* element ui 表單驗證 *@
+									<el-input v-if="EditStatus" style="width:100%" name="Roleno" v-model="FormAdd.Input1" disabled></el-input>
+									<el-input v-else style="width:100%" name="Roleno" v-model="FormAdd.Input1" onkeyup="value=this.value.replace(/[^a-z|A-Z|0-9]/g,'').toUpperCase()"></el-input>
+								</el-form-item>
+							</td>
+						</tr>
+						<tr>
+							<td style="background-color:#5B5B5B;color:white" align="right">*名稱說明</td> @* style="color:#7373B9" *@
+							<td style="background-color:#E6E6F2">
+								<el-form-item prop="Input2">
+									@* element ui 表單驗證 *@
+									<el-input style="width:100%" name="Rolename" v-model="FormAdd.Input2"></el-input>
+								</el-form-item>
+							</td>
+						</tr>
+						<tr>
+							<td style="background-color:#5B5B5B;color:white" align="right">*類型</td>
+							<td style="background-color:#E6E6F2">
+								<el-form-item prop="Input3">
+									@* element ui 表單驗證 *@
+									<el-select style="width:100%" name="Roletype" v-model="FormAdd.Input3">
+										<el-option v-for="item in Input3Options"
+												   :value="item.value"
+												   :key="item.value"
+												   :label="item.label"></el-option>
+									</el-select>
+								</el-form-item>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2" class="table-primary table-active">
+								<el-tooltip class="item" effect="dark" content="標註 * 為必填" placement="right-start">
+									<el-button v-if="EditStatus"
+											   type="danger"
+											   style="width:60%"
+											   v-on:click="DataUpdate('ArgoCimCimUserrolebasis','UserRoleEdit')"
+											   v-bind:loading="AddButton">更新角色</el-button>
+									<el-button v-else type="primary"
+											   style="width:100%"
+											   v-on:click="DataAdd('ArgoCimCimUserrolebasis')"
+											   v-bind:loading="AddButton">新增角色</el-button>
+								</el-tooltip>
+								<el-button v-show="EditStatus"
+										   type="info"
+										   style="width:30%"
+										   v-on:click="EditStatus=false">取消</el-button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</el-form>
+		</div>
+
+		@* 角色列表 *@
+		<div class="boxRight" :style="{ width: AddBoxWidth + '%' }">
+			@* 以關鍵字檢索 *@
+			<el-button type="info" :icon="AddBoxIcon" v-on:click="AddBox=!AddBox,AddBoxWidth=AddBoxWidth==75?90:75,AddBoxIcon=AddBox==true?'el-icon-arrow-left':'el-icon-arrow-right'"></el-button>
+			<el-input placeholder="關鍵字查詢( 角色代碼 / 名稱說明 )" prefix-icon="el-icon-search" v-bind:style="{width:'300px'}" v-model="Search"></el-input>
+
+			<el-table :data="ParentDataFilter.slice((CurrentPage-1)*PageSize,CurrentPage*PageSize)" :header-cell-style="{background:'#5B5B5B',color:'white','text-align':'center'}" :row-style="{background:'#ECF5FF'}" border highlight-current-row>
+				<el-table-column v-for="(item,index) in ParentTblProperty"
+								 v-if="item=='Roleno'"
+								 v-bind:width="ParentTblWidth[index]"
+								 v-bind:property="item"
+								 v-bind:label="ParentTblLabel[index]"
+								 v-bind:key="index"
+								 sortable fixed>
+					<template slot-scope="rows">
+						<el-button type="text"
+								   v-on:click="DialogTableVisible = true, DialogTitle = `角色 ${rows.row.Roleno} 功能綁定`,GetUserRoleMenu(rows.row.Roleno),EditName = `${rows.row.Roleno}`">
+							{{rows.row.Roleno}}
+						</el-button>
+					</template>
+				</el-table-column>
+				<el-table-column v-for="(item,index) in ParentTblProperty"
+								 v-if="item!=='Roleno'"
+								 v-bind:min-width="ParentTblWidth[index]" @* 固定欄位寬度加總若比table寬度小, 會造成fixed在右邊的欄位和其他欄位間出現空白, 取消固定寬度, 改給最小寬度,寬度不足時就會自動補滿 *@
+								 v-bind:property="item"
+								 v-bind:label="ParentTblLabel[index]"
+								 v-bind:key="index"
+								 sortable></el-table-column>
+				<el-table-column v-bind:width="120" label="編輯" align="center" fixed="right">
+					<template slot-scope="rows">
+						<el-button type="primary"
+								   icon="el-icon-edit"
+								   v-on:click="DataEdit(rows.row)"
+								   circle></el-button>
+						<el-button type="danger"
+								   icon="el-icon-delete"
+								   v-bind:loading="rows.row.DELBUTTON"
+								   v-on:click="DataDel('UserRoleDel',rows.row,'Roleno')"
+								   circle></el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+
+			<hr></hr>
+
+			<el-pagination background
+						   layout="total, prev, pager, next,jumper"
+						   :total="ParentDataFilter.length"
+						   :current-page.sync="CurrentPage"
+						   :page-size="PageSize"
+						   :hide-on-single-page="HideSinglePage"
+						   style="text-align:center"
+						   @@current-change="HandleCurrentChange"></el-pagination>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script>
+		// js 檔不支援 Razor 語法, 故於 cshtml 定義 userId
+		var userId = '@UserId'
+
+	</script>
+
+	<script src="~/userManageSysScripts/UserManageSys/Role.js?v=202501211011"></script>
+
+}
