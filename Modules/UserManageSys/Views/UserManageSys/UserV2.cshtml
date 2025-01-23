@@ -1,0 +1,170 @@
+﻿@{
+	Layout = "_Layout";
+	var UserId = User.Identity.Name;
+
+}
+
+<style scoped>
+	[v-cloak] {
+		display: none;
+	}
+
+	/* 懸浮視窗標題顏色 */
+	.el-dialog__header {
+		background-color: #8E8E8E;
+		.el-dialog__title,.el-dialog__headerbtn i
+
+	{
+		color: white;
+	}
+
+	}
+
+	.el-table__body tr.current-row > td {
+		background: #FFF3EE !important;
+	}
+
+</style>
+
+<div id="app">
+
+	<div>
+		<h3>使用者角色</h3>
+	</div>
+
+	<hr></hr>
+
+	<div v-if="Loading"></div>
+
+	<div v-else>
+		@* 懸浮視窗 *@
+		<div v-if="DialogTableVisible">
+			@* 推測加上v-if, 當dialog關閉時會將整個dialog銷毀,重新展開時就會是新的生命週期 *@
+
+			<el-dialog :title="`${DialogTitle}`" :visible.sync="DialogTableVisible" width="70%">
+				@* v-on:close="DialogClose()" 此方法是將form 輸入框重置,但重新打開dialog會導致原應選中狀態無法重新渲染*@
+				<el-input placeholder="關鍵字查詢( 角色代碼 / 名稱說明 )" prefix-icon="el-icon-search" v-bind:style="{width:'300px'}" v-model="SearchDialog"></el-input>
+
+				@* 員工綁定角色 *@
+				<el-table :data="DialogFilter.slice((DialogCurrentPage-1)*DialogPageSize,DialogCurrentPage*DialogPageSize)"
+						  :header-cell-style="{background:'#5B5B5B',color:'white','text-align':'center'}"
+						  :row-style="{background:'#ECF5FF'}"
+						  border highlight-current-row>
+					<el-table-column v-bind:width="80" label="綁定狀態" align="center">
+						@* sortable="custom" :sort-method="sortByChecked" *@
+						<template slot-scope="rows">
+							<input type="checkbox"
+								   style="width:20px;height:20px"
+								   :key="rows.row.Roleno"
+								   v-bind:checked="ChildCheckboxArr.includes(`${rows.row.Roleno}`)"
+								   v-on:change="DataBind(`${rows.row.Roleno}`,'ChildCheckboxArr','ArgoCimCimUserrole')">
+						</template>
+					</el-table-column>
+					<el-table-column v-for="(item,index) in ChildTblProperty"
+									 v-bind:width="ChildTblWidth[index]"
+									 v-bind:property="item"
+									 v-bind:label="ChildTblLabel[index]"
+									 v-bind:key="index"
+									 sortable>
+					</el-table-column>
+				</el-table>
+
+				<hr></hr>
+				<el-pagination background
+							   layout="total, prev, pager, next,jumper"
+							   :total="DialogFilter.length"
+							   :current-page.sync="DialogCurrentPage"
+							   :page-size="DialogPageSize"
+							   :hide-on-single-page="HideSinglePage"
+							   style="text-align:center"
+							   @@current-change="DialogHandleCurrentChange"></el-pagination>
+
+			</el-dialog>
+
+		</div>
+
+		@* 人員 data *@
+		<div>
+			@* 以部門檢索 *@
+			<el-select v-model="SearchUserDept" filterable>
+				<el-option v-for="(option,index) in SearchUserDeptOption"
+						   v-bind:value="option"
+						   v-bind:label="option==''?'全部選擇':option"
+						   v-bind:key="index"></el-option>
+			</el-select>
+
+			@* 以關鍵字檢索 *@
+			<el-input placeholder="關鍵字查詢( 工號 / 姓名 / 部門 / E-MAIL )"
+					  prefix-icon="el-icon-search"
+					  v-bind:style="{width:'400px'}"
+					  v-model="Search"></el-input>
+
+			@* 以到職日檢索 *@
+			<el-date-picker v-model="SearchComeDay"
+							type="date"
+							placeholder=">=到職日"
+							format="yyyy-MM-dd"
+							value-format="yyyy-MM-dd"></el-date-picker>
+
+			@* 以離職日檢索 *@
+			<el-date-picker v-model="SearchLeaveDay"
+							type="date"
+							placeholder=">=離職日"
+							format="yyyy-MM-dd"
+							value-format="yyyy-MM-dd"></el-date-picker>
+
+			<el-table :data="ParentDataFilter.slice((CurrentPage-1)*PageSize,CurrentPage*PageSize)"
+					  :header-cell-style="{background:'#5B5B5B',color:'white','text-align':'center'}"
+					  :row-style="{background:'#ECF5FF'}"
+					  border
+					  highlight-current-row>
+				<el-table-column v-for="(item,index) in ParentTblProperty"
+								 v-if="item=='Userno'"
+								 v-bind:width="ParentTblWidth[index]"
+								 v-bind:property="item"
+								 v-bind:label="ParentTblLabel[index]"
+								 v-bind:key="index"
+								 sortable>
+					<template slot-scope="rows">
+						<el-button type="text"
+								   v-on:click="DialogTableVisible = true,
+                                               DialogTitle = `${rows.row.Userno} ${rows.row.Username} 角色編輯`,
+                                               GetUserRole(rows.row.Userno),EditName = `${rows.row.Userno}`">
+							{{rows.row.Userno}}
+						</el-button>
+					</template>
+				</el-table-column>
+				<el-table-column v-for="(item,index) in ParentTblProperty"
+								 v-if="item!=='Userno'"
+								 v-bind:width="ParentTblWidth[index]"
+								 v-bind:property="item"
+								 v-bind:label="ParentTblLabel[index]"
+								 v-bind:key="index"
+								 sortable>
+				</el-table-column>
+			</el-table>
+
+			<hr></hr>
+
+			<el-pagination background
+						   layout="total, prev, pager, next,jumper"
+						   :total="ParentDataFilter.length"
+						   :current-page.sync="CurrentPage"
+						   :page-size="PageSize"
+						   :hide-on-single-page="HideSinglePage"
+						   style="text-align:center"
+						   @@current-change="HandleCurrentChange"></el-pagination>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script>
+		// js 檔不支援 Razor 語法, 故於 cshtml 定義 userId
+		var userId = '@UserId'
+
+	</script>
+
+	<script src="~/userManageSysScripts/UserManageSys/User.js?v=202501211028"></script>
+
+}

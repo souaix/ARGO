@@ -22,7 +22,7 @@ public class DbContextFactory : IDbContextFactory
 		// 檢查 environment 是否為 null 或空字串，若是則使用 DefaultEnvironment
 		if (string.IsNullOrWhiteSpace(environment))
 		{
-			environment = DefaultEnvironment;
+			environment = "envProduction";
 		}
 
 		// 建立作用域，確保 DbContext 在 Scoped 範圍內

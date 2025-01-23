@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\images\CustomerMap\" />
+    <Folder Include="wwwroot\images\UserManageSys\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +20,7 @@
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\Modules\ModuleBase\ModuleBase.csproj" />
+    <ProjectReference Include="..\Modules\UserManageSys\UserManageSys.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 

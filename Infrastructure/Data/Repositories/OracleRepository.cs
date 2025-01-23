@@ -56,4 +56,41 @@ public class OracleRepository : IRepository
 			return await connection.ExecuteAsync(sql, parameters);
 		}
 	}
+
+	// Insert 操作
+	public async Task<int> InsertAsync<T>(string sql, T entity)
+	{
+		using (var connection = CreateConnection())
+		{
+			// 打印插入的實體資料
+			Console.WriteLine("Inserting Entity:");
+			foreach (var property in entity.GetType().GetProperties())
+			{
+				var name = property.Name;
+				var value = property.GetValue(entity);
+				Console.WriteLine($"    {name}: {value}");
+			}
+
+			return await connection.ExecuteAsync(sql, entity);
+		}
+	}
+
+	// Update 操作
+	public async Task<int> UpdateAsync<T>(string sql, T entity)
+	{
+		using (var connection = CreateConnection())
+		{
+			// 打印更新的實體資料
+			Console.WriteLine("Updating Entity:");
+			foreach (var property in entity.GetType().GetProperties())
+			{
+				var name = property.Name;
+				var value = property.GetValue(entity);
+				Console.WriteLine($"    {name}: {value}");
+			}
+
+			return await connection.ExecuteAsync(sql, entity);
+		}
+	}
+
 }
